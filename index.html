@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DCC - Customer Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .stepper { display: flex; justify-content: space-between; position: relative; margin-bottom: 30px; }
+        .step { text-align: center; width: 20%; z-index: 2; }
+        .step-icon { width: 30px; height: 30px; border-radius: 50%; background: #ddd; margin: 0 auto 5px; line-height: 30px; font-weight: bold; color: white; }
+        .step.active .step-icon { background: #0d6efd; }
+        .stepper::before { content: ""; position: absolute; top: 15px; left: 10%; right: 10%; height: 2px; background: #ddd; z-index: 1; }
+    </style>
+</head>
+<body class="bg-light p-3">
+
+<div id="loginArea" class="container mt-5">
+    <div class="card p-4 mx-auto shadow" style="max-width: 400px;">
+        <h4 class="text-center fw-bold">DCC LOGIN</h4>
+        <p class="small text-center text-muted">Masukkan nomor WhatsApp untuk cek pesanan Anda</p>
+        <input type="text" id="waLogin" class="form-control mb-3" placeholder="Contoh: 08123xxx">
+        <button onclick="login()" class="btn btn-primary w-100">MASUK KE DASHBOARD</button>
+    </div>
+</div>
+
+<div id="dashboardArea" class="container mt-4" style="display:none;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5>Halo, <span id="userNameDisplay">User</span></h5>
+        <button class="btn btn-sm btn-outline-danger" onclick="location.reload()">Keluar</button>
+    </div>
+
+    <div class="card p-3 shadow-sm">
+        <h6 class="fw-bold border-bottom pb-2">TRACKING PESANAN SAYA</h6>
+        <div id="listPesanan">
+            </div>
+    </div>
+</div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsBV5c7OWd55nWm2-153Z16BqjbA2U0BY6OBnR6M-VoU6en6tIprqLJ_2WO_x9KrM/exec";
+    let currentUserWA = "";
+
+    function login() {
+        currentUserWA = document.getElementById('waLogin').value;
+        if(!currentUserWA) return alert("Isi No WA!");
+        
+        document.getElementById('loginArea').style.display = 'none';
+        document.getElementById('dashboardArea').style.display = 'block';
+        loadOrders();
+    }
+
+    function loadOrders() {
+        fetch(`${SCRIPT_URL}?wa=${currentUserWA}`)
+        .then(res => res.json())
+        .then(data => {
+            let html = "";
+            for(let i=1; i<data.length; i++) {
+                const status = data[i][7];
+                html += `
+                <div class="card mb-3 p-3 border-start border-primary border-4">
+                    <div class="d-flex justify-content-between">
+                        <strong>ID: ${data[i][1]}</strong>
+                        <span class="badge bg-primary">${status}</span>
+                    </div>
+                    <p class="small mb-2">${data[i][4]} - ${data[i][5]}</p>
+                    
+                    <div class="stepper mt-3">
+                        <div class="step ${['Pemesanan Diterima','Rancangan Dibuat','Menunggu Pembayaran','Pesanan Diproses','Selesai'].includes(status) ? 'active' : ''}">
+                            <div class="step-icon">1</div><small style="font-size: 0.6rem;">Diterima</small>
+                        </div>
+                        <div class="step ${['Rancangan Dibuat','Menunggu Pembayaran','Pesanan Diproses','Selesai'].includes(status) ? 'active' : ''}">
+                            <div class="step-icon">2</div><small style="font-size: 0.6rem;">Dirancang</small>
+                        </div>
+                        <div class="step ${['Menunggu Pembayaran','Pesanan Diproses','Selesai'].includes(status) ? 'active' : ''}">
+                            <div class="step-icon">3</div><small style="font-size: 0.6rem;">Bayar</small>
+                        </div>
+                        <div class="step ${['Pesanan Diproses','Selesai'].includes(status) ? 'active' : ''}">
+                            <div class="step-icon">4</div><small style="font-size: 0.6rem;">Proses</small>
+                        </div>
+                        <div class="step ${status == 'Selesai' ? 'active' : ''}">
+                            <div class="step-icon">5</div><small style="font-size: 0.6rem;">Selesai</small>
+                        </div>
+                    </div>
+
+                    ${data[i][8] !== '-' ? `<a href="${data[i][8]}" class="btn btn-sm btn-success w-100 mt-2" target="_blank">LIHAT RANCANGAN DCC</a>` : ''}
+                </div>`;
+            }
+            document.getElementById('listPesanan').innerHTML = html || "<p class='text-center py-4'>Belum ada pesanan.</p>";
+        });
+    }
+</script>
+</body>
+</html>
