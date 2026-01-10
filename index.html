@@ -76,7 +76,7 @@
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsBV5c7OWd55nWm2-153Z16BqjbA2U0BY6OBnR6M-VoU6en6tIprqLJ_2WO_x9KrM/exec"; // GANTI DENGAN URL ANDA
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoRCPcEKxVyHjvyGFRKmGceRIQX43eR1LNV9cplw3eZFp4or-hqqiV4HVNlJQ4V9s/exec"; // GANTI DENGAN URL ANDA
     let currentUserWA = "";
 
     function login() {
@@ -130,56 +130,73 @@
     fetch(`${SCRIPT_URL}?wa=${currentUserWA}`)
     .then(res => res.json())
     .then(data => {
-        let activeHtml = ""; // Untuk pesanan yang sedang berjalan
-        let historyHtml = ""; // Untuk pesanan yang sudah SELESAI
+        let activeHtml = "";
+        let historyHtml = "";
         
-        // Loop dari data terbaru (bawah ke atas di spreadsheet)
         for(let i = data.length - 1; i >= 1; i--) { 
+            const idPesanan = data[i][1];
             const status = data[i][7];
+            const linkRancangan = data[i][8];
+            const linkBukti = data[i][9];
+
             const orderCard = `
-                <div class="card mb-3 p-3 border-0 bg-white shadow-sm" style="border-radius:10px;">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
+                <div class="card mb-3 p-3 border-0 bg-white shadow-sm" style="border-radius:12px;">
+                    <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <span class="badge bg-secondary small mb-1">${data[i][1]}</span>
+                            <span class="badge bg-secondary mb-1">${idPesanan}</span>
                             <h6 class="fw-bold mb-0">${data[i][4]}</h6>
                         </div>
                         <span class="badge ${status === 'Selesai' ? 'bg-success' : 'bg-primary'}">${status}</span>
                     </div>
-                    <small class="text-muted d-block">${data[i][5]}</small>
                     <hr class="my-2 opacity-25">
                     
-                    ${status !== 'Selesai' ? `
-                    <div class="stepper mt-3 d-flex justify-content-between text-center" style="font-size: 0.6rem;">
-                        <div class="flex-fill ${['Pemesanan Diterima','Rancangan Dibuat','Menunggu Pembayaran','Pesanan Diproses','Selesai'].includes(status) ? 'text-primary fw-bold' : 'text-muted'}">●<br>Diterima</div>
-                        <div class="flex-fill ${['Rancangan Dibuat','Menunggu Pembayaran','Pesanan Diproses','Selesai'].includes(status) ? 'text-primary fw-bold' : 'text-muted'}">●<br>Rancang</div>
-                        <div class="flex-fill ${['Menunggu Pembayaran','Pesanan Diproses','Selesai'].includes(status) ? 'text-primary fw-bold' : 'text-muted'}">●<br>Bayar</div>
-                        <div class="flex-fill ${['Pesanan Diproses','Selesai'].includes(status) ? 'text-primary fw-bold' : 'text-muted'}">●<br>Proses</div>
-                    </div>` : '<p class="text-success small mb-0 fw-bold">✓ Transaksi Selesai</p>'}
+                    <div class="d-grid gap-2">
+                        ${linkRancangan !== '-' ? `<a href="${linkRancangan}" class="btn btn-sm btn-outline-primary fw-bold" target="_blank">📂 Lihat Rancangan DCC</a>` : ''}
+                        
+                        ${status === 'Menunggu Pembayaran' ? `
+                            <div class="bg-light p-2 rounded text-center border">
+                                <small class="d-block mb-1 fw-bold text-danger">Silakan transfer sesuai estimasi:</small>
+                                <h6 class="fw-bold">${data[i][6]}</h6>
+                                <input type="text" id="bukti-${idPesanan}" class="form-control form-control-sm mb-1" placeholder="Tempel Link Bukti Transfer/Foto">
+                                <button onclick="kirimBukti('${idPesanan}')" class="btn btn-sm btn-danger w-100 fw-bold">Kirim Konfirmasi Bayar</button>
+                            </div>
+                        ` : ''}
 
-                    ${data[i][8] !== '-' ? `<a href="${data[i][8]}" class="btn btn-sm btn-outline-primary w-100 mt-3 fw-bold" target="_blank">LIHAT RANCANGAN DCC</a>` : ''}
+                        <button onclick="chatAdmin('${idPesanan}', '${status}')" class="btn btn-sm btn-success fw-bold">
+                            💬 Chat Admin (Update Progres)
+                        </button>
+                    </div>
                 </div>`;
 
-            // Logika Pemisah
-            if (status === 'Selesai') {
-                historyHtml += orderCard;
-            } else {
-                activeHtml += orderCard;
-            }
+            if (status === 'Selesai') { historyHtml += orderCard; } else { activeHtml += orderCard; }
         }
-
-        // Tampilkan ke layar
         document.getElementById('listPesanan').innerHTML = `
-            <div class="mb-4">
-                <small class="fw-bold text-primary">PESANAN AKTIF</small>
-                ${activeHtml || "<p class='text-muted small mt-2'>Tidak ada pesanan aktif.</p>"}
-            </div>
-            <div class="mt-4">
-                <small class="fw-bold text-secondary">RIWAYAT PESANAN</small>
-                <div class="opacity-75">${historyHtml || "<p class='text-muted small mt-2'>Belum ada riwayat.</p>"}</div>
-            </div>
-        `;
+            <div class="mb-4"><small class="fw-bold text-primary">PESANAN AKTIF</small>${activeHtml || "<p class='text-muted small'>Tidak ada pesanan.</p>"}</div>
+            <div class="mt-4"><small class="fw-bold text-secondary">RIWAYAT</small>${historyHtml || ""}</div>`;
     });
-}    
+}
+
+// FUNGSI NOTIFIKASI WA OTOMATIS
+function chatAdmin(id, status) {
+    const pesan = `Halo DCC, saya ingin menanyakan progres Pesanan *${id}*. Saat ini statusnya adalah: *${status}*. Mohon informasinya ya, terima kasih!`;
+    const noAdmin = "628123456789"; // GANTI DENGAN NOMOR WA DCC ANDA
+    window.open(`https://wa.me/${noAdmin}?text=${encodeURIComponent(pesan)}`, '_blank');
+}
+
+// FUNGSI KIRIM BUKTI BAYAR
+function kirimBukti(id) {
+    const link = document.getElementById(`bukti-${id}`).value;
+    if(!link) return alert("Masukkan link foto bukti bayar!");
+
+    fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify({ action: "konfirmasiBayar", idPesanan: id, linkBukti: link })
+    }).then(() => {
+        alert("Bukti pembayaran telah dikirim! Admin akan segera memverifikasi.");
+        loadOrders();
+    });
+}  
 </script>
 
 <style>
