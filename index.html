@@ -13,82 +13,179 @@
         .stepper::before { content: ""; position: absolute; top: 15px; left: 10%; right: 10%; height: 2px; background: #ddd; z-index: 1; }
     </style>
 </head>
-<body class="bg-light p-3">
+<body class="bg-light p-2 p-md-3">
 
 <div id="loginArea" class="container mt-5">
-    <div class="card p-4 mx-auto shadow" style="max-width: 400px;">
-        <h4 class="text-center fw-bold">DCC LOGIN</h4>
-        <p class="small text-center text-muted">Masukkan nomor WhatsApp untuk cek pesanan Anda</p>
-        <input type="text" id="waLogin" class="form-control mb-3" placeholder="Contoh: 08123xxx">
-        <button onclick="login()" class="btn btn-primary w-100">MASUK KE DASHBOARD</button>
+    <div class="card p-4 mx-auto shadow border-0" style="max-width: 400px; border-radius: 15px;">
+        <div class="text-center mb-4">
+            <h3 class="fw-bold text-primary">DCC</h3>
+            <p class="small text-muted text-uppercase tracking-wide">Customer Portal</p>
+        </div>
+        <label class="small fw-bold mb-1">Nomor WhatsApp</label>
+        <input type="text" id="waLogin" class="form-control mb-3" placeholder="Contoh: 08123456789">
+        <button onclick="login()" class="btn btn-primary w-100 fw-bold py-2">MASUK DASHBOARD</button>
     </div>
 </div>
 
-<div id="dashboardArea" class="container mt-4" style="display:none;">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h5>Halo, <span id="userNameDisplay">User</span></h5>
-        <button class="btn btn-sm btn-outline-danger" onclick="location.reload()">Keluar</button>
+<div id="dashboardArea" class="container mt-3" style="display:none;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold text-dark">DCC System</h5>
+        <button class="btn btn-sm btn-outline-danger fw-bold" onclick="location.reload()">Keluar</button>
     </div>
 
-    <div class="card p-3 shadow-sm">
-        <h6 class="fw-bold border-bottom pb-2">TRACKING PESANAN SAYA</h6>
-        <div id="listPesanan">
+    <div class="row g-3">
+        <div class="col-lg-5">
+            <div class="card p-3 shadow-sm border-0" style="border-radius: 12px;">
+                <h6 class="fw-bold text-primary border-bottom pb-2">SIMULASI RAKIT PC</h6>
+                <form id="formOrder">
+                    <label class="small fw-bold mt-2">Nama Pelanggan</label>
+                    <input type="text" id="namaPelanggan" class="form-control form-control-sm" placeholder="Nama Anda" required>
+
+                    <label class="small fw-bold mt-2">Pilih Kategori Kebutuhan</label>
+                    <select id="kategori" class="form-select form-select-sm" onchange="hitungHarga()" required>
+                        <option value="" disabled selected>Pilih...</option>
+                        <option value="Office" data-harga="3500000">Paket Office (Standard Administrasi)</option>
+                        <option value="Design" data-harga="7500000">Paket Design (Corel/Photoshop)</option>
+                        <option value="Gaming" data-harga="10500000">Paket Gaming (Esports/Triple A)</option>
+                        <option value="Editing" data-harga="15000000">Paket Pro Editing (4K/Rendering)</option>
+                        <option value="Lainnya" data-harga="0">Lainnya / Custom</option>
+                    </select>
+
+                    <label class="small fw-bold mt-2">Catatan Spesifikasi Request</label>
+                    <textarea id="spek" class="form-control form-control-sm" rows="3" placeholder="Contoh: Ingin pakai Intel Core i5, SSD 512GB, Casing Putih..."></textarea>
+
+                    <div class="bg-primary text-white p-3 mt-3 rounded shadow-sm text-center">
+                        <small class="d-block text-uppercase">Estimasi Budget</small>
+                        <h4 class="fw-bold mb-0" id="displayHarga">Rp 0</h4>
+                    </div>
+
+                    <button type="submit" id="btnSimpan" class="btn btn-primary w-100 mt-3 fw-bold shadow">KIRIM PESANAN KE DCC</button>
+                </form>
             </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card p-3 shadow-sm border-0" style="border-radius: 12px; min-height: 400px;">
+                <h6 class="fw-bold text-dark border-bottom pb-2 text-uppercase small">Status Pesanan Saya</h6>
+                <div id="listPesanan">
+                    <p class="text-center py-5 text-muted">Memuat data...</p>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsBV5c7OWd55nWm2-153Z16BqjbA2U0BY6OBnR6M-VoU6en6tIprqLJ_2WO_x9KrM/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsBV5c7OWd55nWm2-153Z16BqjbA2U0BY6OBnR6M-VoU6en6tIprqLJ_2WO_x9KrM/exec"; // GANTI DENGAN URL ANDA
     let currentUserWA = "";
 
     function login() {
         currentUserWA = document.getElementById('waLogin').value;
-        if(!currentUserWA) return alert("Isi No WA!");
-        
+        if(!currentUserWA) return alert("Masukkan Nomor WA Anda!");
         document.getElementById('loginArea').style.display = 'none';
         document.getElementById('dashboardArea').style.display = 'block';
         loadOrders();
     }
 
-    function loadOrders() {
-        fetch(`${SCRIPT_URL}?wa=${currentUserWA}`)
-        .then(res => res.json())
-        .then(data => {
-            let html = "";
-            for(let i=1; i<data.length; i++) {
-                const status = data[i][7];
-                html += `
-                <div class="card mb-3 p-3 border-start border-primary border-4">
-                    <div class="d-flex justify-content-between">
-                        <strong>ID: ${data[i][1]}</strong>
-                        <span class="badge bg-primary">${status}</span>
-                    </div>
-                    <p class="small mb-2">${data[i][4]} - ${data[i][5]}</p>
-                    
-                    <div class="stepper mt-3">
-                        <div class="step ${['Pemesanan Diterima','Rancangan Dibuat','Menunggu Pembayaran','Pesanan Diproses','Selesai'].includes(status) ? 'active' : ''}">
-                            <div class="step-icon">1</div><small style="font-size: 0.6rem;">Diterima</small>
-                        </div>
-                        <div class="step ${['Rancangan Dibuat','Menunggu Pembayaran','Pesanan Diproses','Selesai'].includes(status) ? 'active' : ''}">
-                            <div class="step-icon">2</div><small style="font-size: 0.6rem;">Dirancang</small>
-                        </div>
-                        <div class="step ${['Menunggu Pembayaran','Pesanan Diproses','Selesai'].includes(status) ? 'active' : ''}">
-                            <div class="step-icon">3</div><small style="font-size: 0.6rem;">Bayar</small>
-                        </div>
-                        <div class="step ${['Pesanan Diproses','Selesai'].includes(status) ? 'active' : ''}">
-                            <div class="step-icon">4</div><small style="font-size: 0.6rem;">Proses</small>
-                        </div>
-                        <div class="step ${status == 'Selesai' ? 'active' : ''}">
-                            <div class="step-icon">5</div><small style="font-size: 0.6rem;">Selesai</small>
-                        </div>
-                    </div>
-
-                    ${data[i][8] !== '-' ? `<a href="${data[i][8]}" class="btn btn-sm btn-success w-100 mt-2" target="_blank">LIHAT RANCANGAN DCC</a>` : ''}
-                </div>`;
-            }
-            document.getElementById('listPesanan').innerHTML = html || "<p class='text-center py-4'>Belum ada pesanan.</p>";
-        });
+    // Fungsi Hitung Harga Otomatis
+    function hitungHarga() {
+        const select = document.getElementById('kategori');
+        const harga = select.options[select.selectedIndex].getAttribute('data-harga');
+        const formatRupiah = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(harga);
+        document.getElementById('displayHarga').innerText = harga == 0 ? "Hubungi Admin" : formatRupiah;
     }
+
+    // Fungsi Kirim Pesanan
+    document.getElementById('formOrder').onsubmit = function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnSimpan');
+        btn.disabled = true;
+        btn.innerText = "MENGIRIM...";
+
+        const payload = {
+            action: "tambahPesanan",
+            wa: currentUserWA,
+            nama: document.getElementById('namaPelanggan').value,
+            kategori: document.getElementById('kategori').value,
+            spek: document.getElementById('spek').value,
+            harga: document.getElementById('displayHarga').innerText
+        };
+
+        fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
+        .then(() => {
+            alert("Pesanan Terkirim! Silakan tunggu tim DCC menghubungi Anda.");
+            document.getElementById('formOrder').reset();
+            document.getElementById('displayHarga').innerText = "Rp 0";
+            btn.disabled = false;
+            btn.innerText = "KIRIM PESANAN KE DCC";
+            loadOrders(); // Refresh list
+        })
+        .catch(() => {
+            alert("Terjadi kesalahan!");
+            btn.disabled = false;
+        });
+    };
+
+    function loadOrders() {
+    fetch(`${SCRIPT_URL}?wa=${currentUserWA}`)
+    .then(res => res.json())
+    .then(data => {
+        let activeHtml = ""; // Untuk pesanan yang sedang berjalan
+        let historyHtml = ""; // Untuk pesanan yang sudah SELESAI
+        
+        // Loop dari data terbaru (bawah ke atas di spreadsheet)
+        for(let i = data.length - 1; i >= 1; i--) { 
+            const status = data[i][7];
+            const orderCard = `
+                <div class="card mb-3 p-3 border-0 bg-white shadow-sm" style="border-radius:10px;">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <span class="badge bg-secondary small mb-1">${data[i][1]}</span>
+                            <h6 class="fw-bold mb-0">${data[i][4]}</h6>
+                        </div>
+                        <span class="badge ${status === 'Selesai' ? 'bg-success' : 'bg-primary'}">${status}</span>
+                    </div>
+                    <small class="text-muted d-block">${data[i][5]}</small>
+                    <hr class="my-2 opacity-25">
+                    
+                    ${status !== 'Selesai' ? `
+                    <div class="stepper mt-3 d-flex justify-content-between text-center" style="font-size: 0.6rem;">
+                        <div class="flex-fill ${['Pemesanan Diterima','Rancangan Dibuat','Menunggu Pembayaran','Pesanan Diproses','Selesai'].includes(status) ? 'text-primary fw-bold' : 'text-muted'}">●<br>Diterima</div>
+                        <div class="flex-fill ${['Rancangan Dibuat','Menunggu Pembayaran','Pesanan Diproses','Selesai'].includes(status) ? 'text-primary fw-bold' : 'text-muted'}">●<br>Rancang</div>
+                        <div class="flex-fill ${['Menunggu Pembayaran','Pesanan Diproses','Selesai'].includes(status) ? 'text-primary fw-bold' : 'text-muted'}">●<br>Bayar</div>
+                        <div class="flex-fill ${['Pesanan Diproses','Selesai'].includes(status) ? 'text-primary fw-bold' : 'text-muted'}">●<br>Proses</div>
+                    </div>` : '<p class="text-success small mb-0 fw-bold">✓ Transaksi Selesai</p>'}
+
+                    ${data[i][8] !== '-' ? `<a href="${data[i][8]}" class="btn btn-sm btn-outline-primary w-100 mt-3 fw-bold" target="_blank">LIHAT RANCANGAN DCC</a>` : ''}
+                </div>`;
+
+            // Logika Pemisah
+            if (status === 'Selesai') {
+                historyHtml += orderCard;
+            } else {
+                activeHtml += orderCard;
+            }
+        }
+
+        // Tampilkan ke layar
+        document.getElementById('listPesanan').innerHTML = `
+            <div class="mb-4">
+                <small class="fw-bold text-primary">PESANAN AKTIF</small>
+                ${activeHtml || "<p class='text-muted small mt-2'>Tidak ada pesanan aktif.</p>"}
+            </div>
+            <div class="mt-4">
+                <small class="fw-bold text-secondary">RIWAYAT PESANAN</small>
+                <div class="opacity-75">${historyHtml || "<p class='text-muted small mt-2'>Belum ada riwayat.</p>"}</div>
+            </div>
+        `;
+    });
+}    
 </script>
+
+<style>
+    label { color: #475569; }
+    .form-control:focus, .form-select:focus { box-shadow: none; border-color: #0d6efd; }
+    #listPesanan { max-height: 500px; overflow-y: auto; }
+</style>
 </body>
 </html>
