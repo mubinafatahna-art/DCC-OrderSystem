@@ -6,86 +6,108 @@
     <title>DCC - Premium Customer Portal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        :root { --primary: #00d2ff; --secondary: #3a7bd5; --dark: #0f172a; --card: #1e293b; }
-        body { background-color: var(--dark); color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .card { background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; color: white; }
-        .form-control, .form-select { background: #334155; border: none; color: white; }
-        .form-control:focus { background: #475569; color: white; box-shadow: 0 0 10px var(--primary); }
-        .btn-primary { background: linear-gradient(45deg, var(--primary), var(--secondary)); border: none; }
-        .btn-success { background: #10b981; border: none; }
-        .badge-status { font-size: 0.7rem; padding: 5px 10px; border-radius: 20px; }
-        .stepper-dot { width: 10px; height: 10px; border-radius: 50%; background: #475569; display: inline-block; }
-        .active-dot { background: var(--primary); box-shadow: 0 0 8px var(--primary); }
+        :root { --primary: #00d2ff; --secondary: #3a7bd5; --dark: #0f172a; --card: #1e293b; --text-muted: #94a3b8; }
+        body { background-color: var(--dark); color: #f8fafc; font-family: 'Segoe UI', Roboto, sans-serif; min-height: 100vh; }
+        .card { background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; transition: 0.3s; }
+        .form-control, .form-select { background: #334155; border: 1px solid #475569; color: white; border-radius: 8px; }
+        .form-control:focus { background: #475569; color: white; border-color: var(--primary); box-shadow: 0 0 12px rgba(0, 210, 255, 0.3); }
+        .btn-primary { background: linear-gradient(45deg, var(--primary), var(--secondary)); border: none; border-radius: 8px; }
+        .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .badge-status { font-size: 0.75rem; font-weight: 600; padding: 6px 12px; border-radius: 30px; }
+        
+        /* Stepper Tracking */
+        .stepper { display: flex; justify-content: space-between; position: relative; padding: 10px 0; }
+        .step-item { position: relative; z-index: 2; flex: 1; text-align: center; }
+        .step-dot { width: 12px; height: 12px; border-radius: 50%; background: #475569; margin: 0 auto 5px; border: 2px solid var(--dark); }
+        .step-item.active .step-dot { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
+        .step-item.active small { color: var(--primary); font-weight: bold; }
+        .stepper::before { content: ""; position: absolute; top: 15px; left: 10%; right: 10%; height: 2px; background: #334155; z-index: 1; }
+        
+        #listPesanan { max-height: 80vh; overflow-y: auto; padding-right: 5px; }
+        #listPesanan::-webkit-scrollbar { width: 5px; }
+        #listPesanan::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
     </style>
 </head>
-<body class="p-2 p-md-4">
+<body>
 
-<div id="loginArea" class="container mt-5">
-    <div class="card p-4 mx-auto shadow-lg" style="max-width: 400px;">
+<div id="loginArea" class="container pt-5">
+    <div class="card p-4 mx-auto shadow-lg" style="max-width: 400px; margin-top: 10vh;">
         <div class="text-center mb-4">
-            <h2 class="fw-bold" style="color: var(--primary);">DCC</h2>
-            <p class="small text-muted">COMPUTER CENTER PORTAL</p>
+            <h1 class="fw-bold m-0" style="color: var(--primary); letter-spacing: 2px;">DCC</h1>
+            <p class="small text-muted fw-bold">COMPUTER CENTER PORTAL</p>
         </div>
-        <label class="small fw-bold mb-1">Nomor WhatsApp</label>
-        <input type="text" id="waLogin" class="form-control mb-3" placeholder="Contoh: 08123xxxx">
-        <button onclick="login()" class="btn btn-primary w-100 fw-bold">ENTER DASHBOARD</button>
+        <div class="mb-3">
+            <label class="small fw-bold text-uppercase opacity-75 mb-1">WhatsApp Number</label>
+            <input type="text" id="waLogin" class="form-control form-control-lg text-center" placeholder="628xxxxxxxx">
+        </div>
+        <button onclick="login()" class="btn btn-primary w-100 fw-bold py-3">LOGIN TO SYSTEM</button>
     </div>
 </div>
 
-<div id="dashboardArea" class="container" style="display:none;">
+<div id="dashboardArea" class="container mt-4" style="display:none;">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="fw-bold mb-0">Hello, <span id="userDisplay" class="text-primary">Guest</span></h4>
-        <button class="btn btn-sm btn-outline-light opacity-50" onclick="location.reload()">Logout</button>
+        <div>
+            <h4 class="fw-bold mb-0 text-white">Dashboard</h4>
+            <small class="text-muted">User: <span id="userDisplay" class="text-primary fw-bold"></span></small>
+        </div>
+        <button class="btn btn-sm btn-outline-danger px-3" onclick="location.reload()">Logout</button>
     </div>
 
     <div class="row g-4">
         <div class="col-lg-5">
-            <div class="card p-4 border-0 shadow">
-                <h5 class="fw-bold mb-3 border-bottom pb-2">SIMULATION ORDER</h5>
+            <div class="card p-4 h-100 shadow">
+                <h5 class="fw-bold mb-3 d-flex align-items-center">
+                    <span class="me-2">🛠️</span> Simulation Order
+                </h5>
                 <form id="formOrder">
-                    <label class="small mb-1">Nama Lengkap</label>
-                    <input type="text" id="namaPelanggan" class="form-control mb-2" required>
+                    <label class="small mb-1 opacity-75">Customer Name</label>
+                    <input type="text" id="namaPelanggan" class="form-control mb-3" required>
 
-                    <label class="small mb-1">Kategori Spek</label>
-                    <select id="kategori" class="form-select mb-2" onchange="hitungHarga()" required>
-                        <option value="" disabled selected>Pilih Kebutuhan...</option>
-                        <option value="Office" data-harga="3500000">Office Station</option>
-                        <option value="Design" data-harga="7500000">Design Works</option>
-                        <option value="Gaming" data-harga="10500000">Gaming Beast</option>
-                        <option value="Editing" data-harga="15000000">Pro Editing</option>
-                        <option value="Custom" data-harga="0">Custom Order</option>
+                    <label class="small mb-1 opacity-75">Category / Needs</label>
+                    <select id="kategori" class="form-select mb-3" onchange="hitungHarga()" required>
+                        <option value="" disabled selected>Select Category...</option>
+                        <option value="Office" data-harga="3500000">Office (Home & Student)</option>
+                        <option value="Design" data-harga="7500000">Creative Design (Adobe Suite)</option>
+                        <option value="Gaming" data-harga="10500000">High-End Gaming</option>
+                        <option value="Editing" data-harga="15000000">Pro Video Editing / Rendering</option>
+                        <option value="Custom" data-harga="0">Custom Component Request</option>
                     </select>
 
-                    <label class="small mb-1">Catatan Khusus</label>
-                    <textarea id="spek" class="form-control mb-3" rows="3" placeholder="Tulis spesifikasi impianmu..."></textarea>
+                    <label class="small mb-1 opacity-75">Spesification Detail</label>
+                    <textarea id="spek" class="form-control mb-3" rows="4" placeholder="Contoh: Monitor 24 inch, Keyboard RGB, dll..."></textarea>
 
-                    <div class="p-3 rounded text-center mb-3" style="background: rgba(255,255,255,0.05);">
-                        <small class="d-block opacity-50">ESTIMASI BIAYA</small>
+                    <div class="p-3 rounded text-center mb-4" style="background: rgba(255,255,255,0.05); border: 1px dashed rgba(255,255,255,0.1);">
+                        <small class="d-block text-muted mb-1 text-uppercase small">Estimation Price</small>
                         <h3 class="fw-bold text-primary mb-0" id="displayHarga">Rp 0</h3>
                     </div>
 
-                    <button type="submit" id="btnSimpan" class="btn btn-primary w-100 fw-bold py-2">SUBMIT REQUEST</button>
+                    <button type="submit" id="btnSimpan" class="btn btn-primary w-100 fw-bold py-3">SUBMIT ORDER REQUEST</button>
                 </form>
             </div>
         </div>
 
         <div class="col-lg-7">
-            <h6 class="fw-bold mb-3 text-uppercase">My Orders Tracking</h6>
-            <div id="listPesanan"></div>
+            <h5 class="fw-bold mb-3 d-flex align-items-center">
+                <span class="me-2">📦</span> My Tracking Status
+            </h5>
+            <div id="listPesanan">
+                </div>
         </div>
     </div>
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLYXSwHLaS17sn-3aBAwleq2DyfAE5CDA1BaKTYnpn0Gm_YZ-19Xd0y7rym691bw/exec"; 
-    // CARA GANTI NOMOR WA ADMIN: Ganti angka di bawah ini
-    const NOMOR_ADMIN_WA = "6281944602761"; 
+    // --- CONFIGURATION ---
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwOvEsTr3vrtmgzme0faoPID3Jf8ZSSAuez_xcPnk1AwS_DH0dUWWnYv0IZM_DGpDk/exec"; 
+    const NOMOR_ADMIN_WA = "6281944602761"; // Masukkan nomor WA DCC Anda
 
     let currentUserWA = "";
 
     function login() {
-        currentUserWA = document.getElementById('waLogin').value;
-        if(!currentUserWA) return alert("Masukkan Nomor WA!");
+        const wa = document.getElementById('waLogin').value;
+        if(!wa) return alert("Please enter WhatsApp number!");
+        currentUserWA = wa;
+        document.getElementById('userDisplay').innerText = wa;
         document.getElementById('loginArea').style.display = 'none';
         document.getElementById('dashboardArea').style.display = 'block';
         loadOrders();
@@ -94,13 +116,93 @@
     function hitungHarga() {
         const select = document.getElementById('kategori');
         const harga = select.options[select.selectedIndex].getAttribute('data-harga');
-        document.getElementById('displayHarga').innerText = harga == 0 ? "Hubungi Admin" : new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(harga);
+        const display = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(harga);
+        document.getElementById('displayHarga').innerText = harga == 0 ? "Call Admin" : display;
     }
 
-    // FUNGSI UPLOAD FOTO PROSES
-    async function uploadBukti(id, nama) {
+    document.getElementById('formOrder').onsubmit = function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnSimpan');
+        btn.disabled = true; btn.innerText = "SENDING...";
+
+        const payload = {
+            action: "tambahPesanan",
+            wa: currentUserWA,
+            nama: document.getElementById('namaPelanggan').value,
+            kategori: document.getElementById('kategori').value,
+            spek: document.getElementById('spek').value,
+            harga: document.getElementById('displayHarga').innerText
+        };
+
+        fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
+        .then(() => {
+            alert("Order Success! DCC will contact you soon.");
+            location.reload();
+        });
+    };
+
+    function loadOrders() {
+        const container = document.getElementById('listPesanan');
+        container.innerHTML = '<div class="text-center mt-5"><div class="spinner-border text-primary"></div></div>';
+
+        fetch(`${SCRIPT_URL}?wa=${currentUserWA}`)
+        .then(r => r.json())
+        .then(data => {
+            let active = ""; let history = "";
+            for(let i = data.length-1; i >= 1; i--) {
+                const id = data[i][1];
+                const status = data[i][7];
+                const isSelesai = status === "Selesai";
+
+                const card = `
+                <div class="card mb-3 p-3 border-0">
+                    <div class="d-flex justify-content-between">
+                        <span class="text-primary fw-bold small">#${id}</span>
+                        <span class="badge-status ${isSelesai ? 'bg-success text-white' : 'bg-primary text-white'}">${status}</span>
+                    </div>
+                    <h6 class="fw-bold mt-2 mb-1">${data[i][4]}</h6>
+                    <small class="text-muted d-block mb-3">${data[i][5]}</small>
+
+                    <div class="stepper mb-3">
+                        <div class="step-item ${['Pemesanan Diterima','Rancangan Dibuat','Menunggu Pembayaran','Pesanan Diproses','Selesai'].includes(status)?'active':''}">
+                            <div class="step-dot"></div><small>Received</small>
+                        </div>
+                        <div class="step-item ${['Rancangan Dibuat','Menunggu Pembayaran','Pesanan Diproses','Selesai'].includes(status)?'active':''}">
+                            <div class="step-dot"></div><small>Design</small>
+                        </div>
+                        <div class="step-item ${['Menunggu Pembayaran','Pesanan Diproses','Selesai'].includes(status)?'active':''}">
+                            <div class="step-dot"></div><small>Pay</small>
+                        </div>
+                        <div class="step-item ${['Pesanan Diproses','Selesai'].includes(status)?'active':''}">
+                            <div class="step-dot"></div><small>Process</small>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        ${data[i][8] !== '-' ? `<a href="${data[i][8]}" target="_blank" class="btn btn-sm btn-outline-primary fw-bold">VIEW DESIGN PDF/IMG</a>` : ''}
+                        
+                        ${status === 'Menunggu Pembayaran' ? `
+                            <div class="bg-dark p-2 rounded border border-secondary mt-2 text-center">
+                                <label class="small fw-bold d-block mb-2">Upload Transfer Receipt:</label>
+                                <input type="file" id="file-${id}" class="form-control form-control-sm mb-2">
+                                <button onclick="uploadProses('${id}', '${data[i][3]}')" id="btn-${id}" class="btn btn-sm btn-danger w-100 fw-bold">UPLOAD & CONFIRM</button>
+                            </div>
+                        ` : ''}
+
+                        <button onclick="chatAdmin('${id}', '${status}')" class="btn btn-sm btn-success fw-bold">CONTACT ADMIN WA</button>
+                    </div>
+                </div>`;
+                if(isSelesai) history += card; else active += card;
+            }
+            container.innerHTML = `
+                <p class="small fw-bold text-primary mb-2">ON PROGRESS</p>${active || '<p class="text-muted small">No active orders.</p>'}
+                <p class="small fw-bold text-muted mt-4 mb-2">COMPLETED</p>${history || '<p class="text-muted small">No history.</p>'}`;
+        });
+    }
+
+    async function uploadProses(id, nama) {
         const fileInput = document.getElementById(`file-${id}`);
-        if(!fileInput.files[0]) return alert("Pilih foto bukti terlebih dahulu!");
+        if(!fileInput.files[0]) return alert("Select a photo first!");
         
         const btn = document.getElementById(`btn-${id}`);
         btn.innerText = "UPLOADING..."; btn.disabled = true;
@@ -108,24 +210,17 @@
         const reader = new FileReader();
         reader.readAsDataURL(fileInput.files[0]);
         reader.onload = async () => {
-            const payload = { 
-                action: "uploadBukti", 
-                idPesanan: id, 
-                nama: nama,
-                file: reader.result 
-            };
+            const payload = { action: "uploadBukti", idPesanan: id, nama: nama, file: reader.result };
             await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            alert("Berhasil! Admin akan memverifikasi.");
+            alert("Upload Success! Waiting for admin verification.");
             loadOrders();
         };
     }
 
     function chatAdmin(id, status) {
-        const text = `Halo Admin DCC, saya mau tanya progres ID: *${id}* [${status}]`;
+        const text = `Halo DCC, saya ingin menanyakan progres pesanan ID: *${id}* [Status: ${status}].`;
         window.open(`https://wa.me/${NOMOR_ADMIN_WA}?text=${encodeURIComponent(text)}`, '_blank');
     }
-
-    // (Gunakan logika loadOrders dari tahap sebelumnya dengan penyesuaian CSS)
 </script>
 </body>
 </html>
