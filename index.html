@@ -43,20 +43,26 @@
                     <label class="form-label">KATEGORI</label>
                     <select id="kategori" class="form-select mb-2" onchange="hitung()" required>
                         <option value="" disabled selected>Pilih...</option>
-                        <option value="Office" data-hrg="3500000">Office Station</option>
-                        <option value="Gaming" data-hrg="10500000">Gaming Beast</option>
+                        <option value="Office" data-hrg="4500000">Office Station</option>
+                        <option value="Office" data-hrg="7500000">Gaming / Editing Ringan</option>
+                        <option value="Gaming" data-hrg="11500000">Gaming Beast / Rendering</option>
+                        <option value="Gaming" data-hrg="5500000">Server</option>
                         <option value="Custom" data-hrg="0">Custom</option>
                     </select>
                     <label class="form-label">METODE BAYAR</label>
                     <select id="metode" class="form-select mb-3">
-                        <option value="Transfer BCA">Transfer BCA (123-456-DCC)</option>
-                        <option value="QRIS">QRIS / E-Wallet</option>
+                        <option value="Transfer BCA">Transfer</option>
+                        <option value="QRIS">QRIS / E-Wallet (Not Available)</option>
                         <option value="Tunai">Tunai di Toko</option>
                     </select>
+                    <div id="boxRekening" class="alert alert-info bg-dark text-white border-primary p-2 mb-2">
+                        <small class="d-block fw-bold text-neon">Rekening Tujuan:</small>
+                        <small>Bank BCA: 123-456-7890 a/n DCC Admin</small>
+                    </div>
                     <label class="form-label">DETAIL REQUEST</label>
                     <textarea id="spek" class="form-control mb-3" rows="2"></textarea>
                     <div class="p-2 text-center rounded mb-3" style="background:rgba(0,210,255,0.1)">
-                        <small class="text-white opacity-75">ESTIMASI</small>
+                        <small class="text-white opacity-75">ESTIMASI HARGA</small>
                         <h4 id="hargaDisplay" class="text-neon m-0">Rp 0</h4>
                     </div>
                     <button type="submit" id="btnKirim" class="btn btn-neon w-100 py-3">KIRIM PESANAN</button>
@@ -73,7 +79,7 @@
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyCEVWXrrzvVU6qAmaSfFxskm20TzwSJbN3s8Q8rnTUTy_yyskqUxMhjh_5uqdb5-I/exec"; // GANTI DENGAN URL APPS SCRIPT
-    const ADMIN_WA = "628xxx"; // GANTI DENGAN NO WA ANDA
+    const ADMIN_WA = "6281944602761"; // GANTI DENGAN NO WA ANDA
     let userWA = "";
 
     window.onload = function() {
