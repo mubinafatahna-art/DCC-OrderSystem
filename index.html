@@ -3,181 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DCC - Premium Customer Portal</title>
+    <title>DCC Portal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* TEMA DARK GAMING FAVORIT ANDA */
-        :root { --primary: #00d2ff; --secondary: #3a7bd5; --dark: #0f172a; --card: #1e293b; }
-        body { background-color: var(--dark); color: #f8fafc; font-family: 'Segoe UI', sans-serif; min-height: 100vh; }
-        
-        .card { background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; color: #f8fafc; }
-        
-        /* Perbaikan Teks: Menjamin semua label berwarna neon dan teks isi berwarna putih/terang */
-        .form-label { color: var(--primary) !important; font-weight: bold; font-size: 0.85rem; text-transform: uppercase; }
-        .text-neon { color: var(--primary) !important; }
-        .text-white-custom { color: #f8fafc !important; }
-        .text-muted-custom { color: #94a3b8 !important; }
-
-        .form-control, .form-select { background: #334155; border: 1px solid #475569; color: white !important; }
-        .form-control:focus { background: #475569; color: white; border-color: var(--primary); box-shadow: 0 0 10px rgba(0, 210, 255, 0.5); }
-        
-        .btn-primary { background: linear-gradient(45deg, var(--primary), var(--secondary)); border: none; font-weight: bold; }
-        .btn-success { background: #10b981; border: none; font-weight: bold; }
-        
-        #listPesanan { max-height: 80vh; overflow-y: auto; }
+        :root { --neon: #00d2ff; --bg: #0f172a; --card: #1e293b; --white: #ffffff; }
+        body { background: var(--bg); color: var(--white); font-family: sans-serif; }
+        .card { background: var(--card); border: 1px solid rgba(0, 210, 255, 0.2); border-radius: 15px; }
+        .text-neon { color: var(--neon); font-weight: bold; }
+        .form-label { color: var(--neon); font-size: 0.8rem; font-weight: bold; }
+        .form-control, .form-select { background: #0f172a; border: 1px solid #334155; color: white !important; }
+        .btn-neon { background: linear-gradient(45deg, #00d2ff, #3a7bd5); border: none; color: white; font-weight: bold; }
+        .btn-wa { background: #25d366; border: none; color: white; font-weight: bold; }
     </style>
 </head>
-<body class="p-2 p-md-4">
+<body class="p-3">
 
-<div id="loginArea" class="container mt-5" style="display: none;">
-    <div class="card p-4 mx-auto shadow-lg" style="max-width: 400px; margin-top: 10vh;">
-        <div class="text-center mb-4">
-            <h1 class="fw-bold text-neon" style="letter-spacing: 2px;">DCC</h1>
-            <p class="small text-white-custom opacity-75">COMPUTER CENTER PORTAL</p>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">WhatsApp Number</label>
-            <input type="text" id="waLogin" class="form-control form-control-lg text-center" placeholder="628xxxxxxxx">
-        </div>
-        <button onclick="login()" class="btn btn-primary w-100 py-3">LOGIN TO SYSTEM</button>
+<div id="loginArea" class="container mt-5" style="display:none;">
+    <div class="card p-4 mx-auto shadow" style="max-width: 350px;">
+        <h2 class="text-center text-neon mb-4">DCC LOGIN</h2>
+        <label class="form-label">NO WHATSAPP</label>
+        <input type="text" id="waInput" class="form-control mb-3 text-center" placeholder="628xxx">
+        <button onclick="login()" class="btn btn-neon w-100 py-2">MASUK</button>
     </div>
 </div>
 
-<div id="dashboardArea" class="container" style="display: none;">
+<div id="dashboardArea" class="container" style="display:none;">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="fw-bold m-0 text-white-custom">DCC <span class="text-neon">PORTAL</span></h4>
-        <button class="btn btn-sm btn-outline-danger px-3" onclick="logout()">Logout</button>
+        <h3 class="text-neon m-0">DCC PORTAL</h3>
+        <button class="btn btn-sm btn-outline-danger text-white" onclick="logout()">Logout</button>
     </div>
 
     <div class="row g-4">
         <div class="col-lg-5">
             <div class="card p-4 shadow">
-                <h5 class="fw-bold mb-3 text-neon border-bottom pb-2">SIMULATION ORDER</h5>
-                <form id="formOrder">
-                    <label class="form-label">Customer Name</label>
-                    <input type="text" id="namaPelanggan" class="form-control mb-3" required>
-
-                    <label class="form-label">Category Needs</label>
-                    <select id="kategori" class="form-select mb-3" onchange="hitungHarga()" required>
-                        <option value="" disabled selected>Select...</option>
-                        <option value="Office" data-harga="3500000">Office Station</option>
-                        <option value="Gaming" data-harga="10500000">Gaming Beast</option>
-                        <option value="Custom" data-harga="0">Custom Request</option>
+                <h5 class="text-neon border-bottom pb-2">SIMULASI PESANAN</h5>
+                <form id="orderForm">
+                    <label class="form-label">NAMA</label>
+                    <input type="text" id="nama" class="form-control mb-2" required>
+                    <label class="form-label">KATEGORI</label>
+                    <select id="kategori" class="form-select mb-2" onchange="hitung()" required>
+                        <option value="" disabled selected>Pilih...</option>
+                        <option value="Office" data-hrg="3500000">Office Station</option>
+                        <option value="Gaming" data-hrg="10500000">Gaming Beast</option>
+                        <option value="Custom" data-hrg="0">Custom</option>
                     </select>
-
-                    <label class="form-label">Payment Method</label>
-                    <select id="metodeBayar" class="form-select mb-3" onchange="toggleRekening()">
-                        <option value="Transfer">Transfer Bank</option>
+                    <label class="form-label">METODE BAYAR</label>
+                    <select id="metode" class="form-select mb-3">
+                        <option value="Transfer BCA">Transfer BCA (123-456-DCC)</option>
                         <option value="QRIS">QRIS / E-Wallet</option>
-                        <option value="Cash">Cash / COD</option>
+                        <option value="Tunai">Tunai di Toko</option>
                     </select>
-
-                    <div id="boxRekening" class="p-2 mb-3 rounded border border-primary bg-dark">
-                        <small class="text-neon d-block fw-bold">REKENING DCC:</small>
-                        <p class="small m-0 text-white-custom">BCA: 123-456-7890 (A/N ADMIN DCC)</p>
+                    <label class="form-label">DETAIL REQUEST</label>
+                    <textarea id="spek" class="form-control mb-3" rows="2"></textarea>
+                    <div class="p-2 text-center rounded mb-3" style="background:rgba(0,210,255,0.1)">
+                        <small class="text-white opacity-75">ESTIMASI</small>
+                        <h4 id="hargaDisplay" class="text-neon m-0">Rp 0</h4>
                     </div>
-
-                    <label class="form-label">Spesification Detail</label>
-                    <textarea id="spek" class="form-control mb-3" rows="3" placeholder="I want RGB, White Case..."></textarea>
-
-                    <div class="p-3 rounded text-center mb-3" style="background: rgba(0,210,255,0.1);">
-                        <small class="text-white-custom opacity-75">ESTIMATION PRICE</small>
-                        <h3 class="fw-bold text-neon mb-0" id="displayHarga">Rp 0</h3>
-                    </div>
-
-                    <button type="submit" id="btnSimpan" class="btn btn-primary w-100 fw-bold py-3">SUBMIT ORDER</button>
+                    <button type="submit" id="btnKirim" class="btn btn-neon w-100 py-3">KIRIM PESANAN</button>
                 </form>
             </div>
         </div>
 
         <div class="col-lg-7">
-            <h5 class="fw-bold mb-3 text-white-custom">MY TRACKING STATUS</h5>
-            <div id="listPesanan"></div>
+            <h5 class="text-white mb-3">RIWAYAT & STATUS</h5>
+            <div id="listOrder"></div>
         </div>
     </div>
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx3NLlF8J3tslYGwf6TFJkKD4_V_gHv7nkXQPL_jy11OISJK6vtgJVWFFkVtYJK5Mo/exec"; // GANTI DENGAN URL ANDA
-    const ADMIN_WA = "628xxxxxxxx"; // GANTI DENGAN NOMOR WA ANDA
-    let currentUserWA = "";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyCEVWXrrzvVU6qAmaSfFxskm20TzwSJbN3s8Q8rnTUTy_yyskqUxMhjh_5uqdb5-I/exec"; // GANTI DENGAN URL APPS SCRIPT
+    const ADMIN_WA = "628xxx"; // GANTI DENGAN NO WA ANDA
+    let userWA = "";
 
-    // SOLUSI NO. 1: STAY LOGGED IN
     window.onload = function() {
-        const savedWA = localStorage.getItem('dcc_wa');
-        if(savedWA) {
-            currentUserWA = savedWA;
-            showDashboard();
-        } else {
-            document.getElementById('loginArea').style.display = 'block';
-        }
+        const saved = localStorage.getItem('dcc_wa');
+        if(saved) { userWA = saved; openDashboard(); }
+        else { document.getElementById('loginArea').style.display = 'block'; }
     };
 
     function login() {
-        const wa = document.getElementById('waLogin').value;
-        if(!wa) return alert("Enter WA number!");
-        localStorage.setItem('dcc_wa', wa);
-        currentUserWA = wa;
-        showDashboard();
+        const val = document.getElementById('waInput').value;
+        if(!val) return alert("Masukkan No WA!");
+        localStorage.setItem('dcc_wa', val);
+        userWA = val;
+        openDashboard();
     }
 
-    function logout() {
-        localStorage.removeItem('dcc_wa');
-        location.reload();
-    }
-
-    function showDashboard() {
+    function logout() { localStorage.removeItem('dcc_wa'); location.reload(); }
+    function openDashboard() {
         document.getElementById('loginArea').style.display = 'none';
         document.getElementById('dashboardArea').style.display = 'block';
-        loadOrders();
+        loadData();
     }
 
-    function toggleRekening() {
-        const met = document.getElementById('metodeBayar').value;
-        document.getElementById('boxRekening').style.display = (met === 'Transfer') ? 'block' : 'none';
-    }
-
-    function hitungHarga() {
+    function hitung() {
         const sel = document.getElementById('kategori');
-        const hrg = sel.options[sel.selectedIndex].getAttribute('data-harga');
-        document.getElementById('displayHarga').innerText = hrg == 0 ? "Call Admin" : new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(hrg);
+        const hrg = sel.options[sel.selectedIndex].getAttribute('data-hrg');
+        document.getElementById('hargaDisplay').innerText = hrg == 0 ? "Custom" : "Rp " + Number(hrg).toLocaleString('id-ID');
     }
 
-    // FORM SUBMIT
-    document.getElementById('formOrder').onsubmit = function(e) {
+    document.getElementById('orderForm').onsubmit = function(e) {
         e.preventDefault();
-        const btn = document.getElementById('btnSimpan');
-        btn.disabled = true; btn.innerText = "SENDING...";
-
-        const payload = {
-            action: "tambahPesanan",
-            wa: currentUserWA,
-            nama: document.getElementById('namaPelanggan').value,
-            kategori: document.getElementById('kategori').value,
-            metode: document.getElementById('metodeBayar').value,
-            spek: document.getElementById('spek').value,
-            harga: document.getElementById('displayHarga').innerText
-        };
-
-        fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
-        .then(() => {
-            alert("Success! DCC will process your order.");
-            location.reload();
-        });
+        const btn = document.getElementById('btnKirim');
+        btn.disabled = true; btn.innerText = "MENGIRIM...";
+        
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({
+                action: "tambahPesanan",
+                wa: userWA,
+                nama: document.getElementById('nama').value,
+                kategori: document.getElementById('kategori').value,
+                metode: document.getElementById('metode').value,
+                spek: document.getElementById('spek').value,
+                harga: document.getElementById('hargaDisplay').innerText
+            })
+        }).then(() => { alert("Pesanan Terkirim!"); location.reload(); });
     };
 
-    function loadOrders() {
-        fetch(`${SCRIPT_URL}?wa=${currentUserWA}`)
-        .then(r => r.json())
-        .then(data => {
+    function loadData() {
+        fetch(`${SCRIPT_URL}?wa=${userWA}`).then(r => r.json()).then(data => {
             let html = "";
             for(let i=data.length-1; i>=1; i--) {
-                const status = data[i][8];
-                const id = data[i][1];
+                const id = data[i][1]; const status = data[i][8];
                 html += `
-                <div class="card mb-3 p-3 border-0 shadow-sm">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <span class="text-neon fw-bold small">#${id}</span>
-                            <h6 class="fw-bold mt-1 text-white-custom">${data[i][4]}</h6>
-                        </div>
+                <div class="card p-3 mb-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <small class="text-neon fw-bold">${id}</small>
+                        <span class="badge bg-primary px-3">${status}</span>
+                    </div>
+                    <h6 class="text-white fw-bold mb-1">${data[i][4]} (${data[i][7]})</h6>
+                    <small class="text-white opacity-50 d-block mb-2">${data[i][5]}</small>
+                    ${data[i][11] !== '-' ? `<div class="p-2 mb-2 rounded bg-dark border border-info small text-white">Ket Admin: ${data[i][11]}</div>` : ''}
+                    <div class="d-grid gap-2">
+                        ${data[i][9] !== '-' ? `<a href="${data[i][9]}" target="_blank" class="btn btn-sm btn-outline-info">LIHAT RANCANGAN</a>` : ''}
+                        ${status === 'Pemesanan Diterima' ? `
+                            <div class="p-2 border border-secondary rounded">
+                                <label class="form-label m-0 mb-1">UPLOAD BUKTI TRANSFER</label>
+                                <input type="file" id="f-${id}" class="form-control form-control-sm mb-2">
+                                <button onclick="upload('${id}','${data[i][3]}')" id="b-${id}" class="btn btn-sm btn-danger w-100">KIRIM BUKTI</button>
+                            </div>
+                        ` : ''}
+                        <button onclick="window.open('https://wa.me/${ADMIN_WA}?text=Tanya Progres ${id}')" class="btn btn-sm btn-wa">CHAT ADMIN</button>
+                    </div>
+                </div>`;
+            }
+            document.getElementById('listOrder').innerHTML = html || "<p class='text-center opacity-50'>Belum ada pesanan.</p>";
+        });
+    }
+
+    function upload(id, nama) {
+        const file = document.getElementById(`f-${id}`).files[0];
+        if(!file) return alert("Pilih foto!");
+        const btn = document.getElementById(`b-${id}`);
+        btn.innerText = "UPLOADING..."; btn.disabled = true;
+        
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({ action: "uploadBukti", idPesanan: id, nama: nama, file: reader.result })
+            }).then(() => { alert("Upload Sukses!"); loadData(); });
+        };
+    }
+</script>
+</body>
+</html>
