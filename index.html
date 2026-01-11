@@ -6,162 +6,153 @@
     <title>DCC - Customer Portal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        :root { --primary: #00d2ff; --secondary: #3a7bd5; --dark: #0f172a; --card: #1e293b; }
-        body { background-color: var(--dark); color: #f8fafc; font-family: 'Segoe UI', sans-serif; }
-        .card { background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; color: white; }
-        .text-neon { color: var(--primary); }
-        .form-label { color: var(--primary); font-weight: bold; font-size: 0.85rem; }
-        .form-control, .form-select { background: #334155; border: 1px solid #475569; color: white; }
-        .form-control:focus { background: #475569; color: white; border-color: var(--primary); }
-        .btn-primary { background: linear-gradient(45deg, var(--primary), var(--secondary)); border: none; }
-        /* Stepper Color Fix */
-        .step-item { color: #94a3b8; }
-        .step-item.active { color: var(--primary); font-weight: bold; }
+        :root { --neon: #00d2ff; --bg: #0f172a; --card: #1e293b; }
+        body { background: var(--bg); color: #f8fafc; font-family: sans-serif; }
+        .card { background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; }
+        .text-neon { color: var(--neon); }
+        .form-label { color: var(--neon); font-weight: bold; }
+        .form-control, .form-select { background: #334155; border: none; color: white; }
+        .form-control:focus { background: #475569; color: white; box-shadow: 0 0 8px var(--neon); }
+        .btn-neon { background: linear-gradient(45deg, #00d2ff, #3a7bd5); border: none; color: white; font-weight: bold; }
     </style>
 </head>
-<body class="p-2 p-md-4">
+<body class="p-3">
 
-<div id="loginArea" class="container mt-5" style="display: none;">
-    <div class="card p-4 mx-auto shadow-lg" style="max-width: 400px;">
-        <div class="text-center mb-4">
-            <h2 class="fw-bold text-neon">DCC</h2>
-            <p class="small opacity-75 text-white">LOGIN CUSTOMER</p>
-        </div>
+<div id="loginArea" class="container mt-5" style="display:none;">
+    <div class="card p-4 mx-auto shadow" style="max-width: 400px;">
+        <h3 class="text-center text-neon fw-bold mb-4">DCC LOGIN</h3>
         <label class="form-label">Nomor WhatsApp</label>
         <input type="text" id="waLogin" class="form-control mb-3 text-center" placeholder="628xxxxxxxx">
-        <button onclick="login()" class="btn btn-primary w-100 fw-bold">MASUK</button>
+        <button onclick="login()" class="btn btn-neon w-100 py-2">MASUK</button>
     </div>
 </div>
 
-<div id="dashboardArea" class="container" style="display: none;">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="fw-bold m-0 text-white">DCC <span class="text-neon">Portal</span></h4>
-        <button class="btn btn-sm btn-outline-danger" onclick="logout()">Keluar</button>
+<div id="dashboardArea" class="container mt-3" style="display:none;">
+    <div class="d-flex justify-content-between mb-4">
+        <h4 class="text-neon fw-bold">DCC PORTAL</h4>
+        <button class="btn btn-sm btn-outline-danger" onclick="logout()">Logout</button>
     </div>
 
     <div class="row g-4">
         <div class="col-lg-5">
-            <div class="card p-4 shadow">
-                <h5 class="fw-bold mb-3 text-neon border-bottom pb-2">BUAT PESANAN BARU</h5>
+            <div class="card p-4">
+                <h5 class="text-neon mb-3 border-bottom pb-2">BUAT PESANAN</h5>
                 <form id="formOrder">
-                    <label class="form-label">Nama Lengkap</label>
-                    <input type="text" id="namaPelanggan" class="form-control mb-2" required>
-
-                    <label class="form-label">Kategori Spesifikasi</label>
-                    <select id="kategori" class="form-select mb-2" onchange="hitungHarga()" required>
-                        <option value="" disabled selected>Pilih Kategori...</option>
-                        <option value="Office" data-harga="3500000">Office/Administrasi (kantoran)</option>
-                        <option value="Gaming" data-harga="10500000">Gaming/Editing Ringan</option>
-                        <option value="Gaming" data-harga="10500000">Editing Berat/Rendering</option>
-                        <option value="Custom" data-harga="0">Custom Request</option>
+                    <label class="form-label">Nama</label>
+                    <input type="text" id="nama" class="form-control mb-2" required>
+                    
+                    <label class="form-label">Kategori</label>
+                    <select id="kategori" class="form-select mb-2" onchange="hitung()" required>
+                        <option value="Office" data-harga="3500000">Office</option>
+                        <option value="Gaming" data-harga="10500000">Gaming</option>
                     </select>
 
-                    <label class="form-label">Metode Pembayaran</label>
-                    <select id="metodeBayar" class="form-select mb-2" onchange="toggleRekening()" required>
-                        <option value="Transfer">Transfer Bank</option>
-                        <option value="QRIS">QRIS / E-Wallet ( Not Available )</option>
-                        <option value="Cash">Cash / Tunai Di Toko</option>
+                    <label class="form-label">Metode Bayar</label>
+                    <select id="metode" class="form-select mb-2">
+                        <option value="Transfer">Transfer BCA: 1234567 (DCC)</option>
+                        <option value="Cash">Tunai di Toko</option>
                     </select>
 
-                    <div id="boxRekening" class="alert alert-info bg-dark text-white border-primary p-2 mb-2">
-                        <small class="d-block fw-bold text-neon">Rekening Tujuan:</small>
-                        <small>Bank BSI: 7250710008 a/n Fatahna Fathan Mubina</small>
-                        <small>Bank BSI: 650001029588538 a/n Fatahna Fathan Mubina</small>
-                    </div>
-
-                    <label class="form-label">Detail Request</label>
+                    <label class="form-label">Spesifikasi Request</label>
                     <textarea id="spek" class="form-control mb-3" rows="3"></textarea>
-
-                    <div class="p-3 rounded text-center mb-3" style="background: rgba(0, 210, 255, 0.1);">
-                        <small class="text-white opacity-75">ESTIMASI BIAYA</small>
-                        <h3 class="fw-bold text-neon mb-0" id="displayHarga">Rp 0</h3>
+                    
+                    <div class="p-2 text-center rounded mb-3" style="background:rgba(0,210,255,0.1)">
+                        <small>Estimasi:</small><h4 id="displayHarga" class="text-neon m-0">Rp 0</h4>
                     </div>
-
-                    <button type="submit" id="btnSimpan" class="btn btn-primary w-100 fw-bold">KIRIM PESANAN</button>
+                    <button type="submit" id="btnSimpan" class="btn btn-neon w-100 py-2">KIRIM PESANAN</button>
                 </form>
             </div>
         </div>
-
         <div class="col-lg-7">
-            <h5 class="fw-bold mb-3 text-white">STATUS PESANAN SAYA</h5>
+            <h5 class="text-white mb-3">TRACKING PESANAN</h5>
             <div id="listPesanan"></div>
         </div>
     </div>
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx5xNLKCO1_DxwkQ6pwLJVcvPc1REvqER29UV5_bTAaO85LQLvW_oestrv9c8Gcvb4/exec"; // GANTI INI
-    const ADMIN_WA = "6281944602761"; // GANTI INI
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwA9nMFCqmnwS8epoTZjtNEr5s7qwtcoB93mI4AzUDCr6bCWl_wOb5rFVq5tmDeNL8/exec";
+    let currentUserWA = "6281944602761";
 
-    // 1. CEK LOGIN STATUS SAAT REFRESH
+    // CEK SESSION SAAT REFRESH
     window.onload = function() {
-        const savedWA = localStorage.getItem('dcc_wa');
-        if(savedWA) {
-            currentUserWA = savedWA;
-            showDashboard();
-        } else {
-            document.getElementById('loginArea').style.display = 'block';
-        }
+        const saved = localStorage.getItem('dcc_wa');
+        if(saved) { currentUserWA = saved; showDashboard(); }
+        else { document.getElementById('loginArea').style.display = 'block'; }
     };
 
     function login() {
         const wa = document.getElementById('waLogin').value;
-        if(!wa) return alert("Nomor WA diperlukan!");
+        if(!wa) return alert("Isi No WA!");
         localStorage.setItem('dcc_wa', wa);
         currentUserWA = wa;
         showDashboard();
     }
 
-    function logout() {
-        localStorage.removeItem('dcc_wa');
-        location.reload();
-    }
-
-    function showDashboard() {
+    function logout() { localStorage.removeItem('dcc_wa'); location.reload(); }
+    function showDashboard() { 
         document.getElementById('loginArea').style.display = 'none';
         document.getElementById('dashboardArea').style.display = 'block';
-        loadOrders();
+        loadOrders(); 
     }
 
-    function toggleRekening() {
-        const met = document.getElementById('metodeBayar').value;
-        document.getElementById('boxRekening').style.display = (met === 'Transfer') ? 'block' : 'none';
-    }
-
-    function hitungHarga() {
+    function hitung() {
         const sel = document.getElementById('kategori');
         const hrg = sel.options[sel.selectedIndex].getAttribute('data-harga');
-        document.getElementById('displayHarga').innerText = hrg == 0 ? "Custom" : new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(hrg);
+        document.getElementById('displayHarga').innerText = "Rp " + Number(hrg).toLocaleString('id-ID');
     }
 
-    // Fungsi Load Data tetap sama namun dengan perbaikan warna teks di baris HTML template
+    document.getElementById('formOrder').onsubmit = function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnSimpan');
+        btn.disabled = true; btn.innerText = "MENGIRIM...";
+        
+        const payload = {
+            action: "tambahPesanan",
+            wa: currentUserWA,
+            nama: document.getElementById('nama').value,
+            kategori: document.getElementById('kategori').value,
+            metode: document.getElementById('metode').value,
+            spek: document.getElementById('spek').value,
+            harga: document.getElementById('displayHarga').innerText
+        };
+
+        fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
+        .then(() => { alert("Sukses!"); location.reload(); });
+    };
+
     function loadOrders() {
-        fetch(`${SCRIPT_URL}?wa=${currentUserWA}`)
-        .then(r => r.json())
-        .then(data => {
+        fetch(`${SCRIPT_URL}?wa=${currentUserWA}`).then(r => r.json()).then(data => {
             let html = "";
-            for(let i = data.length-1; i >= 1; i--) {
-                const status = data[i][7];
+            for(let i=data.length-1; i>=1; i--) {
+                const status = data[i][8];
                 html += `
-                <div class="card mb-3 p-3">
+                <div class="card p-3 mb-2">
                     <div class="d-flex justify-content-between">
-                        <span class="text-neon fw-bold small">#${data[i][1]}</span>
+                        <small class="text-neon">${data[i][1]}</small>
                         <span class="badge bg-primary">${status}</span>
                     </div>
-                    <p class="text-white mt-2 mb-1 fw-bold">${data[i][4]} - ${data[i][6]}</p>
-                    <small class="text-white opacity-50">${data[i][10] !== '-' ? 'Catatan Admin: ' + data[i][10] : ''}</small>
-                    
-                    <div class="d-grid gap-2 mt-3">
-                        ${data[i][8] !== '-' ? `<a href="${data[i][8]}" target="_blank" class="btn btn-sm btn-outline-info">DOWNLOAD RANCANGAN</a>` : ''}
-                        <button onclick="window.open('https://wa.me/${ADMIN_WA}')" class="btn btn-sm btn-success">HUBUNGI ADMIN</button>
+                    <p class="text-white mb-1 fw-bold">${data[i][4]} (${data[i][7]})</p>
+                    <small class="text-white opacity-50">${data[i][11] !== '-' ? 'Info: '+data[i][11] : ''}</small>
+                    <div class="mt-2">
+                        ${status === 'Pemesanan Diterima' ? `<input type="file" id="f-${data[i][1]}" class="form-control form-control-sm mb-1"><button onclick="upload('${data[i][1]}')" class="btn btn-sm btn-danger w-100">Upload Bukti</button>` : ''}
                     </div>
                 </div>`;
             }
-            document.getElementById('listPesanan').innerHTML = html || "<p class='text-white opacity-50 text-center'>Belum ada pesanan.</p>";
+            document.getElementById('listPesanan').innerHTML = html;
         });
     }
 
-    // Kode form submit dan upload tetap digunakan dari versi sebelumnya
+    async function upload(id) {
+        const file = document.getElementById(`f-${id}`).files[0];
+        if(!file) return alert("Pilih foto!");
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+            fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "uploadBukti", idPesanan: id, file: reader.result }) })
+            .then(() => { alert("Berhasil!"); loadOrders(); });
+        };
+    }
 </script>
 </body>
 </html>
